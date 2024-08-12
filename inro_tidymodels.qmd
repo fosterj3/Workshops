@@ -4,6 +4,28 @@ format: html
 editor: visual
 ---
 
+**Notes from the Workshop**
+
+tidymodels - supervised machine learning
+
+tidyclust - unsupervised machine learning
+
+
+**Predictor criteria/checklist**
+- ethical 
+- availability 
+- contribute to explainability 
+
+
+75/25 split is the default split
+
+**Splitting Data**
+When should you split your data?
+  Answer: As soon as possible. Attending to missingness should happen after the split
+  
+Guidance for splitting the data: Should focus on testing data to determine how much data you need to get reliable performance (typically more than 1,000 rows is pretty good)
+
+# Install Packages 
 ```{r}
 # Install the packages for the workshop
 pkgs <- 
@@ -15,7 +37,62 @@ pkgs <-
 install.packages(pkgs)
 ```
 
+# Load in Packages
 ```{r}
 library(tidymodels)
+library(forested)
 ```
+
+# Examine the Data 
+```{r}
+View(forested)
+```
+
+# Split the Data 
+```{r}
+set.seed(123)
+forested_split <- initial_split(forested)
+forested_split
+```
+
+```{r}
+forested_train <- training(forested_split)
+forested_test <- testing(forested_split) # Don't examine
+```
+
+```{r}
+# Split the data into 80/20
+set.seed(123)
+forested_second_split <- initial_split(forested, prop = .80)
+```
+
+```{r}
+# Access second split data 
+forested_train_two <- training(forested_second_split)
+forested_test_two <- testing(forested_second_split) # Don't examine
+```
+
+# Exploratory Data Analysis
+```{r}
+summary(forested_train_two)
+```
+
+```{r}
+forested_train_two %>% 
+  ggplot(aes(x=forested)) +
+  geom_bar()
+```
+
+```{r}
+# Visualize the data 
+forested_train_two %>% 
+ggplot(aes(elevation)) +
+  geom_histogram() +
+  facet_wrap(vars(year), scales = "free")
+```
+
+```{r}
+
+```
+
 
