@@ -4,57 +4,72 @@ format: html
 editor: visual
 ---
 
-**Notes from the Workshop**
-Course Website: https://workshops.tidymodels.org/
+# Workshop Notes
 
-- tidymodels - supervised machine learning
+**Types of Machine Learning**
 
-- tidyclust - unsupervised machine learning
+-tidymodels: supervised machine learning
 
+-tidyclust: unsupervised machine learning
 
 **Predictor criteria/checklist**
-- ethical 
-- availability 
-- contribute to explainability 
 
+-ethical
+
+-availability
+
+-contribute to explainability
 
 75/25 split is the default split
 
 **Splitting Data**
-When should you split your data?
-  Answer: As soon as possible. Attending to missingness should happen after the split
-  
+
+When should you split your data? Answer: As soon as possible. Attending to missingness should happen after the split
+
 Guidance for splitting the data: Should focus on testing data to determine how much data you need to get reliable performance (typically more than 1,000 rows is pretty good)
 
 **Ways to fit a Linear Model**
-- lm: for linear model 
-- glmnet: for regularized regression 
-- keras: for regression using TensorFlow
-- stan: for Bayesian regression
-- spark: for large data sets
-- brulee: for regression using torch 
 
-*To specify a model* 
-1) Choose a model  
-2) Specify a model (e.g. lm, glmnet, keras, etc.)
-3) Set the mode
+-lm: for linear model
+
+-glmnet: for regularized regression
+
+-keras: for regression using TensorFlow
+
+-stan: for Bayesian regression
+
+-spark: for large data sets
+
+-brulee: for regression using torch
+
+*To specify a model*
+
+1)  Choose a model
+
+2)  Specify a model (e.g. lm, glmnet, keras, etc.) 3) Set the mode
 
 *find a model*
+
 https://www.tidymodels.org/find/parsnip/
 
 *help page for specific models*
+
 https://parsnip.tidymodels.org//reference/index.html
 
-
 **Modelling Guidelines**
-Begin with a workflow. 
 
-- Workflows handle new data better than base R tools in terms of new factor levels. 
-- You can use other preprocessors besides formulas (more on feature engineering in Advanced tidymodels). 
-- They can help organize your work when working with multiple models. 
-- A workflow captures the entire modeling process 
+Begin with a workflow!
 
-# Resampling Methods
+-Workflows handle new data better than base R tools in terms of new factor levels.
+
+-You can use other preprocessors besides formulas (more on feature engineering in Advanced tidymodels).
+
+-They can help organize your work when working with multiple models.
+
+-A workflow captures the entire modeling process
+
+**Resampling Methods**
+
 *Cross-Validation* randomly splits the data into V groups of roughly equal size (called "folds").
 
 *Monte-Carlo Cross Validation*
@@ -62,17 +77,33 @@ Begin with a workflow.
 *Bootstrapping* is a resampling procedure that uses data from one sample to generate a sampling distribution by repeatedly taking random samples from the known sample, with replacement.
 
 **Types of ML Models**
+
 A random forest empirically performs better than a single decision tree
 
-
 **Tuning Models**
+
 Some model or preprocessing parameters cannot be estimated directly from the data.
 
-Some examples:
-- Tree depth in decision trees
-- Number of neighbors in a K-nearest neighbor model
+Some examples: -Tree depth in decision trees
 
-# Install Packages 
+-Number of neighbors in a K-nearest neighbor model
+
+**References**
+
+-Course Website: https://workshops.tidymodels.org/
+
+-GitHub: https://github.com/tidymodels/workshops/blob/main/classwork/intro-04-classwork.qmd
+
+-TidyModels Website: https://www.tidymodels.org/
+
+-TidyModeling with R Book: https://www.tmwr.org/
+
+-Applied Machine Learning Book: https://aml4td.org/chapters/introduction.html
+
+------------------------------------------------------------------------
+
+# Install Packages
+
 ```{r}
 # Install the packages for the workshop
 pkgs <- 
@@ -85,17 +116,20 @@ install.packages(pkgs)
 ```
 
 # Load in Packages
+
 ```{r}
 library(tidymodels)
 library(forested)
 ```
 
-# Examine the Data 
+# Examine the Data
+
 ```{r}
 View(forested)
 ```
 
-# Split the Data 
+# Split the Data
+
 ```{r}
 set.seed(123)
 forested_split <- initial_split(forested)
@@ -120,6 +154,7 @@ forested_test_two <- testing(forested_second_split) # Don't examine
 ```
 
 # Exploratory Data Analysis
+
 ```{r}
 summary(forested_train_two)
 ```
@@ -150,13 +185,14 @@ forested_train_two %>%
 ```
 
 # Understanding models
+
 ```{r}
 tree_spec <- logistic_reg() %>% 
   set_engine("stan")
 tree_spec
 ```
 
-# Introduction to Modeling 
+# Introduction to Modeling
 
 ```{r}
 # run a workflow to fit the model
@@ -179,7 +215,8 @@ augment(tree_fit, new_data = forested_test_two) %>%
   View()
 ```
 
-# Understanding your model 
+# Understanding your model
+
 ```{r}
 tree_fit %>% 
   extract_fit_engine() %>% 
@@ -187,11 +224,13 @@ tree_fit %>%
 ```
 
 # Extracting model engine object from your fitted workflow
+
 ```{r}
 
 ```
 
-# Evaluating the Model 
+# Evaluating the Model
+
 ```{r}
 # confusion matrix
 augment(tree_fit, new_data = forested_train_two) %>% 
@@ -249,6 +288,7 @@ augment(tree_fit, new_data = forested_train_two) %>%
 ```
 
 # Overfitting
+
 ```{r}
 # You should not do this. This is merely for educational purposes 
 tree_fit %>% 
@@ -284,12 +324,14 @@ mc_cv(forested_train_two, prop = 9/10, times = 10)
 ```
 
 # Create a random forest
+
 ```{r}
 rf_spec <- rand_forest(trees = 1000, mode = "classification")
 rf_spec
 ```
 
-#Workflow 
+#Workflow
+
 ```{r}
 rf_wflow <- workflow(forested ~ ., rf_spec)
 rf_wflow
@@ -311,7 +353,3 @@ final_fit <- last_fit(rf_wflow, forested_split)
 
 final_fit
 ```
-
-
-
-
