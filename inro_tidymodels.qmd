@@ -174,10 +174,40 @@ tree_fit %>%
 
 ```
 
+# Evaluating the Model 
+```{r}
+# confusion matrix
+augment(tree_fit, new_data = forested_train_two) %>% 
+  conf_mat(truth = forested, estimate = .pred_class)
+```
 
+```{r}
+# accuracy checks the how well the model predicts overall
+augment(tree_fit, new_data = forested_train_two) %>% 
+  accuracy(truth = forested, estimate = .pred_class)
 
+#Sensitivity checks how well the model predicts the true "yes"
+augment(tree_fit, new_data = forested_train_two) %>% 
+  sensitivity(truth = forested, estimate = .pred_class)
 
+# Specificity checks how well the model predicts the no's
+augment(tree_fit, new_data = forested_train_two) %>% 
+  specificity(truth = forested, estimate = .pred_class)
+```
 
+```{r}
+# Examine accuracy, specificity, and sensitivity at the same time
+forested_metrics <- metric_set(accuracy, specificity, sensitivity)
+
+augment(tree_fit, new_data = forested_train_two) %>% 
+  forested_metrics(truth = forested, estimate = .pred_class)
+```
+```{r}
+#How well does your model perform for different groups?
+augment(tree_fit, new_data = forested_train_two) %>%
+  group_by(tree_no_tree) %>%
+  accuracy(truth = forested, estimate = .pred_class)
+```
 
 
 
