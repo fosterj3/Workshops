@@ -5,10 +5,11 @@ editor: visual
 ---
 
 **Notes from the Workshop**
+Course Website: https://workshops.tidymodels.org/
 
-tidymodels - supervised machine learning
+- tidymodels - supervised machine learning
 
-tidyclust - unsupervised machine learning
+- tidyclust - unsupervised machine learning
 
 
 **Predictor criteria/checklist**
@@ -24,6 +25,35 @@ When should you split your data?
   Answer: As soon as possible. Attending to missingness should happen after the split
   
 Guidance for splitting the data: Should focus on testing data to determine how much data you need to get reliable performance (typically more than 1,000 rows is pretty good)
+
+**Ways to fit a Linear Model**
+- lm: for linear model 
+- glmnet: for regularized regression 
+- keras: for regression using TensorFlow
+- stan: for Bayesian regression
+- spark: for large data sets
+- brulee: for regression using torch 
+
+*To specify a model* 
+1) Choose a model  
+2) Specify a model (e.g. lm, glmnet, keras, etc.)
+3) Set the mode
+
+*find a model*
+https://www.tidymodels.org/find/parsnip/
+
+*help page for specific models*
+https://parsnip.tidymodels.org//reference/index.html
+
+
+**Modelling Guidelines**
+Begin with a workflow. 
+
+- Workflows handle new data better than base R tools in terms of new factor levels. 
+- You can use other preprocessors besides formulas (more on feature engineering in Advanced tidymodels). 
+- They can help organize your work when working with multiple models. 
+- A workflow captures the entire modeling process 
+
 
 # Install Packages 
 ```{r}
@@ -87,12 +117,82 @@ forested_train_two %>%
 # Visualize the data 
 forested_train_two %>% 
 ggplot(aes(elevation)) +
-  geom_histogram() +
-  facet_wrap(vars(year), scales = "free")
+  geom_histogram() 
 ```
 
 ```{r}
+forested_train_two %>% 
+  ggplot(aes(x=forested)) +
+  geom_bar(aes(fill = land_type), position = "dodge")
+```
+
+```{r}
+forested_train_two %>% 
+  ggplot(aes(x = lon, y = lat, col = forested)) +
+  geom_point()
+```
+
+# Understanding models
+```{r}
+tree_spec <- logistic_reg() %>% 
+  set_engine("stan")
+tree_spec
+```
+
+# Introduction to Modeling 
+
+```{r}
+# run a workflow to fit the model
+tree_spec <-
+  decision_tree() %>% 
+  set_mode("classification")
+
+tree_fit <-
+  workflow(forested ~ ., tree_spec) %>% 
+  fit(data = forested_train_two)  
+```
+
+```{r}
+# Use predict function
+predict(tree_fit, new_data = forested_test_two)
+```
+
+```{r}
+augment(tree_fit, new_data = forested_test_two) %>% 
+  View()
+```
+
+# Understanding your model 
+```{r}
+tree_fit %>% 
+  extract_fit_engine() %>% 
+  rpart.plot::rpart.plot(roundint = FALSE)
+```
+
+# Extracting model engine object from your fitted workflow
+```{r}
 
 ```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
