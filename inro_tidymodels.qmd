@@ -54,6 +54,23 @@ Begin with a workflow.
 - They can help organize your work when working with multiple models. 
 - A workflow captures the entire modeling process 
 
+# Resampling Methods
+*Cross-Validation* randomly splits the data into V groups of roughly equal size (called "folds").
+
+*Monte-Carlo Cross Validation*
+
+*Bootstrapping* is a resampling procedure that uses data from one sample to generate a sampling distribution by repeatedly taking random samples from the known sample, with replacement.
+
+**Types of ML Models**
+A random forest empirically performs better than a single decision tree
+
+
+**Tuning Models**
+Some model or preprocessing parameters cannot be estimated directly from the data.
+
+Some examples:
+- Tree depth in decision trees
+- Number of neighbors in a K-nearest neighbor model
 
 # Install Packages 
 ```{r}
@@ -202,26 +219,98 @@ forested_metrics <- metric_set(accuracy, specificity, sensitivity)
 augment(tree_fit, new_data = forested_train_two) %>% 
   forested_metrics(truth = forested, estimate = .pred_class)
 ```
+
 ```{r}
 #How well does your model perform for different groups?
 augment(tree_fit, new_data = forested_train_two) %>%
   group_by(tree_no_tree) %>%
-  accuracy(truth = forested, estimate = .pred_class)
+  forested_metrics(truth = forested, estimate = .pred_class)
 ```
 
+```{r}
+#Examine the ROC curve
+augment(tree_fit, new_data = forested_train_two) %>%
+  roc_curve(truth = forested, .pred_Yes)
+```
 
+```{r}
+#Examine the area under the curve (AUC)
+augment(tree_fit, new_data = forested_train_two) %>%
+  roc_auc(truth = forested, .pred_Yes)
+```
 
+```{r}
+# Examine the Brier score 
+  ## the brier score is analogous to the mean squared error in regression models
+  ## it captures calibration, the ROC captures separation 
+  ## smaller values are better, for binary classification the "bad model threshold" is about 0.25
+augment(tree_fit, new_data = forested_train_two) %>%
+  brier_class(truth = forested, .pred_Yes)
+```
 
+# Overfitting
+```{r}
+# You should not do this. This is merely for educational purposes 
+tree_fit %>% 
+  augment(forested_train_two) %>% 
+  brier_class(forested, .pred_Yes)
 
+tree_fit %>% 
+  augment(forested_test_two) %>% 
+  brier_class(forested, .pred_Yes)
+```
 
+# How to evaluate different models
 
+```{r}
+# default validation is 10-fold
+set.seed(123)
+forested_folds <- vfold_cv(forested_train_two)
 
+forested_folds$splits[1:3]
+```
 
+```{r}
+# Changing the number of folds
+set.seed(321) 
+vfold_cv(forested_train_two, v = 5)
+```
 
+```{r}
+# Monte-Carlo Cross Validation set
+set.seed(123)
+mc_cv(forested_train_two, prop = 9/10, times = 10)
 
+```
 
+# Create a random forest
+```{r}
+rf_spec <- rand_forest(trees = 1000, mode = "classification")
+rf_spec
+```
 
+#Workflow 
+```{r}
+rf_wflow <- workflow(forested ~ ., rf_spec)
+rf_wflow
+```
 
+```{r}
+ctrl_forested <- control_resamples(save_pred = TRUE)
+
+# Random forest uses random numbers so set the seed first
+
+set.seed(2)
+rf_res <- fit_resamples(rf_wflow, forested_folds, control = ctrl_forested)
+collect_metrics(rf_res)
+```
+
+```{r}
+# forested_split has train + test info
+final_fit <- last_fit(rf_wflow, forested_split) 
+
+final_fit
+```
 
 
 
