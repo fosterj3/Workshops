@@ -15,3 +15,7 @@ pkgs <-
 install.packages(pkgs)
 ```
 
+```{r}
+library(tidymodels)
+```
+
